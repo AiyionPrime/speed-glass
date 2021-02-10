@@ -43,8 +43,6 @@ def get_status(address):
     return response.json()
 
 
-def info(text):
-    print("Info:\t{}".format(text))
 
 
 if "__main__" == __name__:
