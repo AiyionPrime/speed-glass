@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from getpass import getpass
+from hashlib import sha256
 from pathlib import Path
 from sys import argv
 import json
@@ -23,6 +24,13 @@ def challenge(address):
         chall = matches.group(1)
         log.debug(chall)
         return chall
+
+
+def hash_pw(challenge, password):
+    concat = "{}:{}".format(challenge, password)
+    hashed = sha256(concat.encode('utf-8')).hexdigest()
+    log.debug("hashed: {}".format(hashed))
+    return hashed
 
 
 def open_pass(path):
