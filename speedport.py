@@ -58,6 +58,23 @@ def get_default_gateway_linux():
             return socket.inet_ntoa(struct.pack("<L", int(fields[2], 16)))
 
 
+def get_dhcp_listing(session):
+    res = session.get("http://{}/data/LAN.json".format(dg))
+    broken_json = res.text
+    repaired = remove_trailing_comma(broken_json)
+    obj = json.loads(repaired)
+
+    listing = []
+
+    for entry in obj:
+        if "template" == entry["vartype"]:
+            if "addmdevice" == entry["varid"]:
+                continue
+            listed = entry["varvalue"]
+            listing.append(Listing(listed))
+    return listing
+
+
 def get_status(address):
     status_url = "http://{}/data/Status.json".format(address)
     response = requests.get(status_url)
@@ -164,4 +181,9 @@ if "__main__" == __name__:
     s = requests.Session()
     login(s, dg, passwd)
 
+    listing = get_dhcp_listing(s)
+
     print(Listing.header())
+
+    for each in listing:
+        print(each.row())
