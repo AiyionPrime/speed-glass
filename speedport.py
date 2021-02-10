@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
 
+from pathlib import Path
+from sys import argv
 import json
+import logging
 import requests
 import struct
 import socket
+
+log = logging.getLogger(__name__)
+
 
 
 def get_default_gateway_linux():
@@ -27,12 +33,18 @@ def info(text):
 
 
 if "__main__" == __name__:
-    info("Find default gateway...")
+    log.info("Find default gateway...")
     dg = get_default_gateway_linux()
-    info("Done.")
-    info("Gateway found at {}.".format(str(dg)))
-    info("Reading speedport status...")
-    status = get_status(dg)
-    info("Done.")
-    info("got status:")
-    print(json.dumps(status, indent=2))
+    log.info("Done.")
+    log.info("Gateway found at {}.".format(str(dg)))
+    if len(argv) > 1:
+        if "--info" == argv[1]:
+            log.info("Reading speedport status...")
+            status = get_status(dg)
+            log.info("Done.")
+            log.info("got status:")
+            print(json.dumps(status, indent=2))
+            exit(0)
+        else:
+            log.error("Unknown argument {}".format(argv[1]))
+            exit(1)
