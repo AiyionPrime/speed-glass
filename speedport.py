@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from getpass import getpass
 from pathlib import Path
 from sys import argv
 import json
@@ -10,6 +11,20 @@ import socket
 
 log = logging.getLogger(__name__)
 
+
+def open_pass(path):
+    try:
+        with open(".speedport_password", "r") as speedpw_file:
+            passwd = speedpw_file.readline().strip()
+            return passwd
+    except FileNotFoundError:
+        try:
+            cfgpath = "{}/.config/speedport/.password".format(str(Path.home()))
+            with open(cfgpath, "r") as speedpw_file:
+                passwd = speedpw_file.readline().strip()
+                return passwd
+        except FileNotFoundError:
+            pass
 
 
 def get_default_gateway_linux():
@@ -48,3 +63,7 @@ if "__main__" == __name__:
         else:
             log.error("Unknown argument {}".format(argv[1]))
             exit(1)
+    passwd = open_pass(".")
+    if passwd is None:
+        passwd = getpass('Please enter the password of the speedport '
+                         'located at {}: '.format(dg))
