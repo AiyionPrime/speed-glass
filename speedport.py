@@ -2,23 +2,28 @@
 
 from getpass import getpass
 from hashlib import sha256
+from json import dumps
+from json import loads
+from logging import getLogger
 from pathlib import Path
+from re import findall
+from re import search
+from re import sub
+from requests import get
+from requests import post
+from requests import Session
+from socket import inet_ntoa
+from struct import pack
 from sys import argv
-import json
-import logging
-import re
-import requests
-import struct
-import socket
 
-log = logging.getLogger(__name__)
+log = getLogger(__name__)
 
 
 def challenge(address):
     chall_url = "http://{}/html/login/index.html".format(address)
     regex = r"challenge\s=\s\"(.*)\";"
-    response = requests.get(chall_url)
-    matches = re.search(regex, response.text)
+    response = get(chall_url)
+    matches = search(regex, response.text)
     if matches:
         firstgroup = matches.groups()[0]
         chall = matches.group(1)
@@ -55,14 +60,14 @@ def get_default_gateway_linux():
             fields = line.strip().split()
             if fields[1] != '00000000' or not int(fields[3], 16) & 2:
                 continue
-            return socket.inet_ntoa(struct.pack("<L", int(fields[2], 16)))
+            return inet_ntoa(pack("<L", int(fields[2], 16)))
 
 
 def get_dhcp_listing(session):
     res = session.get("http://{}/data/LAN.json".format(dg))
     broken_json = res.text
     repaired = remove_trailing_comma(broken_json)
-    obj = json.loads(repaired)
+    obj = loads(repaired)
 
     listing = []
 
@@ -77,7 +82,7 @@ def get_dhcp_listing(session):
 
 def get_status(address):
     status_url = "http://{}/data/Status.json".format(address)
-    response = requests.get(status_url)
+    response = get(status_url)
     return response.json()
 
 
@@ -101,7 +106,7 @@ def remove_trailing_comma(speedport_mess):
     https://twitter.com/Aiyion/status/1359080085706391554
     """
     regex = r"(})(,)(\s*\]\s*\Z)"
-    result = re.sub(regex, r"\1 \3", speedport_mess, 0)
+    result = sub(regex, r"\1 \3", speedport_mess, 0)
     log.debug(result)
     return result
 
@@ -149,7 +154,7 @@ class Listing:
     @classmethod
     def header(cls):
         header_format = cls._formatting.replace(">", "<")
-        string_list = re.findall(r'\d+', header_format)
+        string_list = findall(r'\d+', header_format)
         int_list = [int(i) for i in string_list]
         int_list.append(header_format.count(" "))
         top_row = header_format.format("mac", "ipv4", "fix", "hostname",
@@ -168,7 +173,7 @@ if "__main__" == __name__:
             status = get_status(dg)
             log.info("Done.")
             log.info("got status:")
-            print(json.dumps(status, indent=2))
+            print(dumps(status, indent=2))
             exit(0)
         else:
             log.error("Unknown argument {}".format(argv[1]))
@@ -178,7 +183,7 @@ if "__main__" == __name__:
         passwd = getpass('Please enter the password of the speedport '
                          'located at {}: '.format(dg))
 
-    s = requests.Session()
+    s = Session()
     login(s, dg, passwd)
 
     listing = get_dhcp_listing(s)
