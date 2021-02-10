@@ -5,11 +5,24 @@ from pathlib import Path
 from sys import argv
 import json
 import logging
+import re
 import requests
 import struct
 import socket
 
 log = logging.getLogger(__name__)
+
+
+def challenge(address):
+    chall_url = "http://{}/html/login/index.html".format(address)
+    regex = r"challenge\s=\s\"(.*)\";"
+    response = requests.get(chall_url)
+    matches = re.search(regex, response.text)
+    if matches:
+        firstgroup = matches.groups()[0]
+        chall = matches.group(1)
+        log.debug(chall)
+        return chall
 
 
 def open_pass(path):
