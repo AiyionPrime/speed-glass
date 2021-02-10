@@ -76,6 +76,19 @@ def login(session, dg, passwd):
     post = session.post(login_url, data=payload)
 
 
+def remove_trailing_comma(speedport_mess):
+    """
+    Remove the last trailing comma in wrongly concatenated JSON-arrays
+
+    this makes the speedports lan.json valid JSON again.
+    https://twitter.com/Aiyion/status/1359080085706391554
+    """
+    regex = r"(})(,)(\s*\]\s*\Z)"
+    result = re.sub(regex, r"\1 \3", speedport_mess, 0)
+    log.debug(result)
+    return result
+
+
 class Listing:
     _formatting = "{:<17}  {:<15}  {:<3}  {:<25}  {:<19}  {:>8}  {:>11}"
 
