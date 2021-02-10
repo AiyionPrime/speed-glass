@@ -64,6 +64,18 @@ def get_status(address):
     return response.json()
 
 
+def login(session, dg, passwd):
+    login_url = "http://{}/data/Login.json".format(dg)
+    chall = challenge(dg)
+    hashpw = hash_pw(chall, passwd)
+    payload = {
+            "csrf_token": "nulltoken",
+            "password": hashpw,
+            "showpw": 0,
+            "challengev": chall}
+    post = session.post(login_url, data=payload)
+
+
 class Listing:
     _formatting = "{:<17}  {:<15}  {:<3}  {:<25}  {:<19}  {:>8}  {:>11}"
 
@@ -135,4 +147,8 @@ if "__main__" == __name__:
     if passwd is None:
         passwd = getpass('Please enter the password of the speedport '
                          'located at {}: '.format(dg))
+
+    s = requests.Session()
+    login(s, dg, passwd)
+
     print(Listing.header())
