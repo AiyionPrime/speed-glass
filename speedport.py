@@ -43,6 +43,55 @@ def get_status(address):
     return response.json()
 
 
+class Listing:
+    _formatting = "{:<17}  {:<15}  {:<3}  {:<25}  {:<19}  {:>8}  {:>11}"
+
+    def __init__(self, crude):
+        prefix = "mdevice_"
+        _ressources = ["mac", "name", "ipv4", "fix_dhcp", "ipv6",
+                       "connected", "type"]
+        concat = [prefix + r for r in _ressources]
+        for entry in crude:
+            if entry["varid"] in concat:
+                setattr(self, entry["varid"], entry["varvalue"])
+
+    @property
+    def connection(self):
+        if self.mdevice_connected == "0":
+            return "lost"
+        if self.mdevice_connected == "1":
+            return "established"
+
+    @property
+    def physical(self):
+        if self.mdevice_type == "0":
+            return "wired"
+        if self.mdevice_type == "1":
+            return "2.4 GHz"
+        if self.mdevice_type == "2":
+            return "5 GHz"
+
+    def __repr__(self):
+        return "Listing<{}>".format(self.mdevice_mac)
+
+    def row(self):
+        return self._formatting.format(self.mdevice_mac,
+                                       self.mdevice_ipv4,
+                                       self.mdevice_fix_dhcp,
+                                       self.mdevice_name,
+                                       self.mdevice_ipv6,
+                                       self.physical,
+                                       self.connection)
+
+    @classmethod
+    def header(cls):
+        header_format = cls._formatting.replace(">", "<")
+        string_list = re.findall(r'\d+', header_format)
+        int_list = [int(i) for i in string_list]
+        int_list.append(header_format.count(" "))
+        top_row = header_format.format("mac", "ipv4", "fix", "hostname",
+                                       "ipv6", "physical", "connection")
+        return "{}\n{}".format(top_row, sum(int_list)*"-")
 
 
 if "__main__" == __name__:
@@ -65,3 +114,4 @@ if "__main__" == __name__:
     if passwd is None:
         passwd = getpass('Please enter the password of the speedport '
                          'located at {}: '.format(dg))
+    print(Listing.header())
