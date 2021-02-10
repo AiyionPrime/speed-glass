@@ -8,8 +8,8 @@ Its primary goals are to assess the operational status of the device and to list
 
 The speedports UI appears to encourage the user not to use, let alone buy another speedport-related device.
 Only one user can access the devices admin-panel at once,
-the UI looses its knowledge about this one user every once and a while;
-it's poorly designed and using it in multiple browser tbas fails to recognize you as one user.
+the UI looses its knowledge about this one user every once in a while;
+it's poorly designed and using it in multiple browser tabs fails to recognize the user as only one user.
 Adding the poor response times of the webserver, its a hassle of about half a minute to list all current network devices;
 and anotherone to recognize devices one searches for.
 
@@ -21,17 +21,16 @@ even if the speedport is under load.
 `speed-glass` has currently two modes.
 The first does not require a login and is called using `speed-glass --info`, which returns every info available without credentials including internet connection status and bandwidth, if unlocked.
 
-The second one is a dhcp glass, which lists current and still known, but gone devices, which have either still a valid lease or a static assignment.
+The second one is a dhcp glass, which lists current as well as still known, but gone devices, which have either still a valid lease or a static assignment.
 Legacy IP is supported, as well as info about how the devices are connected (wired, 2.4- or 5GHz).
 
 For now, calling `speed-glass` gives the currently fatest possible glance over your network using these routers.
 
 ## passwords
 
-There is no option to give the password per commandlineparameters in order to preserver users to log it in their history, too easily.
+There is no option to give the password via commandline-parameters in order to preserve users to log it in their history, too easily.
 
-If you still want the comfort of not entering it any time you'd like to assess your netowrk, use a password file;
-it's encouraged to use some sort of disk- ore home-encryption.
+If one still wants the comfort of not entering it any time one'd like to assess the network, use of a password file is encouraged; as well as it is to use some sort of disk- or home-encryption.
 
 However. This tool looms for a file called `.speedport_password` in the current directory, or in `~/.config/speedport/.password`, as fallback.
 
